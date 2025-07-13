@@ -60,11 +60,11 @@ def process_for_make():
         
         # Prepare response for Make.com
         response_data = {
-            'success': True,
-            'message': 'Video processed successfully',
-            'frame_count': len(encoded_frames),
-            'fps_interval': fps_interval,
-            'quality': quality,
+            #'success': True,
+            #'message': 'Video processed successfully',
+            #'frame_count': len(encoded_frames),
+            #'fps_interval': fps_interval,
+            #'quality': quality,
             'frames': encoded_frames
         }
         

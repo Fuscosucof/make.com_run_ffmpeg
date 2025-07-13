@@ -21,7 +21,7 @@ def get_direct_download_link(file_id):
     """Convert file ID to direct download link"""
     return f"https://drive.google.com/uc?export=download&id={file_id}"
 
-def download_video_from_gdrive(share_link, save_path=None):
+def download_video_from_gdrive_v1(share_link, save_path=None):
     """Download video from Google Drive share link"""
     file_id = extract_file_id(share_link)
     if not file_id:
@@ -67,5 +67,53 @@ def get_video_stream(share_link):
     except:
         return None
 
-
+def download_video_from_gdrive(share_link, save_path=None):
+    """Download video from Google Drive share link"""
+    file_id = extract_file_id(share_link)
+    if not file_id:
+        return None, "Invalid Google Drive link"
+    
+    try:
+        # Start a session to handle cookies
+        session = requests.Session()
+        
+        # Get the initial response
+        response = session.get(
+            "https://docs.google.com/uc?export=download",
+            params={'id': file_id},
+            stream=True
+        )
+        
+        # Handle the download warning for large files
+        token = None
+        for key, value in response.cookies.items():
+            if key.startswith('download_warning'):
+                token = value
+                break
+                
+        if token:
+            response = session.get(
+                "https://docs.google.com/uc?export=download",
+                params={'id': file_id, 'confirm': token},
+                stream=True
+            )
+        
+        # If no save path provided, create temporary file
+        if save_path is None:
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
+            save_path = temp_file.name
+            temp_file.close()
+        
+        # Download and save the video
+        with open(save_path, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=32768):
+                if chunk:
+                    f.write(chunk)
+        
+        return save_path, "Success"
+    
+    except requests.exceptions.RequestException as e:
+        return None, f"Download error: {str(e)}"
+    except Exception as e:
+        return None, f"Error: {str(e)}"
 
