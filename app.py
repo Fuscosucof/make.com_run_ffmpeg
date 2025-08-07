@@ -83,6 +83,15 @@ def process_for_make():
             'error': f'Server error: {str(e)}'
         }), 500
 
+@app.route('/', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({
+        'status': 'healthy',
+        'message': 'FFmpeg video processing server is running',
+        'ffmpeg_available': shutil.which('ffmpeg') is not None
+    })
+
 # railway port
 PORT = int(os.environ.get('PORT', 5000))
 
